@@ -1,0 +1,72 @@
+<html>
+<style>
+#to{
+    border-radius: 20px;
+padding:10px;
+}
+#succ{
+	display: none;
+}
+</style>
+<head>
+	<title>ADMIN</title>
+</head>
+<body>
+	<div id="to">
+	<img id="i1" src="1.jpg"></img>
+	</div>	
+	<p> Logged in as admin</p>
+	<div>
+	<h1>Upload Document</h1>
+		<label>Upload File
+			<input type="file" id="file">
+		</label>
+	<button type="btn btn-primary" id="uploadButton" onclick="uploadFile()">UPLOAD</button>
+	<p id="succ">UPLOAD SUCCESSFUL</button>
+	<div id="Docs">
+	</div>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+	
+	<script src="https://www.gstatic.com/firebasejs/5.0.4/firebase.js"></script>
+	<script>
+  	// Initialize Firebase
+  	var config = {
+    	apiKey: "AIzaSyA59raQCpOBsJNshRgd7fTHtbDNnSo3YFw",
+    	authDomain: "documentms-22178.firebaseapp.com",
+    	databaseURL: "https://documentms-22178.firebaseio.com",
+    	projectId: "documentms-22178",
+    	storageBucket: "documentms-22178.appspot.com",
+    	messagingSenderId: "444428646734"
+  	};
+  	firebase.initializeApp(config);
+
+
+	$(document).ready(function() {
+		$("#uploadButton").hide();
+	});
+	$("#file").on("change",function(event) {
+		selectedFile = event.target.files[0];
+		$("#uploadButton").show();
+	});
+	function uploadFile(){
+		var filename = selectedFile.name;
+		console.log(filename);
+		var storageRef = firebase.storage().ref();
+		var docRef1 = storageRef.child('KEC/');
+		var docRef = docRef1.child(filename);
+		docRef.put(selectedFile).then(function(snapshot) {
+  			console.log('Uploaded a blob or file!');
+		});
+		document.getElementById('succ').style.display = 'block';
+		var delayInMilliseconds = 3000; //1 second
+
+		setTimeout(function() {
+ 		 //your code to be executed after 1 second
+		document.getElementById('succ').style.display = 'none';
+		}, delayInMilliseconds);
+		
+	}
+</script>
+</body>
+</html>
+
