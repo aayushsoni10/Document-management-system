@@ -14,8 +14,7 @@ padding:10px;
 <body>
 	<div id="to">
 	<img id="i1" src="1.jpg"></img>
-	</div>	
-	<p> Logged in as admin</p>
+	</div>
 	<div>
 	<h1>Upload Document</h1>
 		<label>Upload File
@@ -39,7 +38,32 @@ padding:10px;
     	messagingSenderId: "444428646734"
   	};
   	firebase.initializeApp(config);
-
+	
+	var dbref = firebase.database().ref().child('Docs');
+  	var datatodisplay="<ol>";
+  	var idnum=0;
+  	var delstr = 'deleteclass';
+	dbref.on('value', function(snapshot){
+    		snapshot.forEach(function(item){
+        		var dict = item.val();
+        		var url = dict['url'];
+        		var name = dict['name'];
+        		datatodisplay += "<li><ul>"
+        		datatodisplay += "<li>"+"name : "+ name +"</li>";
+        		datatodisplay += "<li>"+"url : "+ url +"</li>";
+        		datatodisplay += "<li>"+ "<button class="+delstr+" id="+item.key+">DELETE</button>" +"</li>";
+        		idnum++;
+        		datatodisplay += "</ul></li>";
+    		});
+    		datatodisplay += "</ol>";
+    		document.getElementById("Docs").innerHTML = datatodisplay;
+    		$(".deleteclass").click(function(){
+      			console.log(this.id+'');
+      			datatodisplay = '<ol>';
+      			dbref.child(this.id).remove();
+    		});
+  		//console.log('val: ' + snapshot.val());
+  	});
 
 	$(document).ready(function() {
 		$("#uploadButton").hide();
@@ -54,18 +78,50 @@ padding:10px;
 		var storageRef = firebase.storage().ref();
 		var docRef1 = storageRef.child('KEC/');
 		var docRef = docRef1.child(filename);
-		docRef.put(selectedFile).then(function(snapshot) {
-  			console.log('Uploaded a blob or file!');
-		});
-		document.getElementById('succ').style.display = 'block';
-		var delayInMilliseconds = 3000; //1 second
+		var upl = docRef.put(selectedFile);
+		var link;
+		upl.on(firebase.storage.TaskEvent.STATE_CHANGED, // or 'state_changed'
+  			function(snapshot) {
+    			var progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+    			console.log('Upload is ' + progress + '% done');
+    			switch (snapshot.state) {
+      				case firebase.storage.TaskState.PAUSED: // or 'paused'
+        				console.log('Upload is paused');
+        			break;
+      				case firebase.storage.TaskState.RUNNING: // or 'running'
+        				console.log('Upload is running');
+        			break;
+    			}
+  			}, function(error) {
+  				switch (error.code) {
+    					case 'storage/unauthorized':
+      						break;
 
-		setTimeout(function() {
- 		 //your code to be executed after 1 second
-		document.getElementById('succ').style.display = 'none';
-		}, delayInMilliseconds);
-		
-	}
+    					case 'storage/canceled':
+      						break;
+
+    					case 'storage/unknown':
+      						break;
+  				}
+			}, function() {
+  				upl.snapshot.ref.getDownloadURL().then(function(downloadURL) {
+    					console.log('File available at', downloadURL);
+					link=downloadURL;
+					var dbref= firebase.database().ref('Docs');
+					dbref.push({
+						name: filename,
+						url: link
+					});
+					
+					document.getElementById('succ').style.display = 'block';
+					var delayInMilliseconds = 3000; //1 second
+
+					setTimeout(function() {
+					document.getElementById('succ').style.display = 'none';
+					}, delayInMilliseconds);
+  				});
+		});
+}
 </script>
 </body>
 </html>
