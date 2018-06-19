@@ -1,0 +1,95 @@
+<html>
+<style>
+body{ background-color: #fffddb;}
+#i1{
+    	border-radius: 20px;
+	padding:10px;
+}
+#succ{
+	display: none;
+}
+#Docs{
+	float:left;
+	width:294px;
+	height:500px;
+	overflow:auto;
+}
+#View{
+	float:right;
+}
+#iview{
+	width:1000px;
+	height:500px;
+}
+#succ{
+	color: red;
+}
+</style>
+<head>
+	<title>USER</title>
+</head>
+<body>
+	<div id="to">
+	<img id="i1" src="1.jpg"></img>
+	</div>
+	<div id="Files">
+	<div id="Docs"></div>
+	<div id="View">
+	<iframe id="iview" src=""></iframe>
+	</div>
+	</div>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+	
+	<script src="https://www.gstatic.com/firebasejs/5.0.4/firebase.js"></script>
+	<script>
+  	// Initialize Firebase
+  	var config = {
+    	apiKey: "AIzaSyA59raQCpOBsJNshRgd7fTHtbDNnSo3YFw",
+    	authDomain: "documentms-22178.firebaseapp.com",
+    	databaseURL: "https://documentms-22178.firebaseio.com",
+    	projectId: "documentms-22178",
+    	storageBucket: "documentms-22178.appspot.com",
+    	messagingSenderId: "444428646734"
+  	};
+  	firebase.initializeApp(config);
+	
+	var dbref = firebase.database().ref().child('Docs');
+  	var datatodisplay = "<ol>";
+  	var idnum = 0;
+	var dict1 = {};
+	var itestr = 'itemclass';
+	var vistr = 'viewclass';
+	dbref.on('value', function(snapshot){
+    		snapshot.forEach(function(item){
+        		var dict = item.val();
+        		var url = dict['url'];
+        		var name = dict['name'];
+			dict1[item.key]=dict;    		
+			datatodisplay += "<li class ="+itestr+" id="+"item"+item.key+"><ul>"
+        		datatodisplay += "<li>"+ name +"</li>";
+			datatodisplay += "<li>"+ "<button class="+vistr+" id="+"vi"+item.key+">VIEW</button>" +"</li>";
+        		idnum++;
+        		datatodisplay += "</ul></li>";
+    		});
+		console.log(dict1);
+    		datatodisplay += "</ol>";
+    		document.getElementById("Docs").innerHTML = datatodisplay;
+		var all = document.getElementsByClassName(itestr);
+		all[0].style.backgroundColor = '#93aaff';
+		var link=dict1[all[0].id.substr(4)]['url'];
+		document.getElementById('iview').src=link;
+		$("."+vistr).click(function() {
+			var itemid= "item" + this.id.substr(2);
+			var all = document.getElementsByClassName(itestr);
+			for (var i = 0; i < all.length; i++) {
+  				all[i].style.backgroundColor = '#fffddb';
+			}
+			document.getElementById(itemid).style.backgroundColor = '#93aaff';
+			var link=dict1[this.id.substr(2)]['url'];
+			document.getElementById('iview').src=link;
+		});
+  	});
+</script>
+</body>
+</html>
+
