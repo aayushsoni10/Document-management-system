@@ -1,8 +1,16 @@
 <html>
 <style>
-#to{
-    border-radius: 20px;
-padding:10px;
+body{ background-color: #fffddb;}
+#i1{
+    	border-radius: 20px;
+	padding:10px;
+}
+#up{
+	float:right;
+	background-color: #ffe7d3;
+	border-radius: 20px;
+	padding-left : 10px;
+	margin:0px 10px;
 }
 #succ{
 	display: none;
@@ -11,7 +19,7 @@ padding:10px;
 	float:left;
 	width:294px;
 	height:500px;
-	overflow:auto
+	overflow:auto;
 }
 #View{
 	float:right;
@@ -20,6 +28,9 @@ padding:10px;
 	width:1000px;
 	height:500px;
 }
+#succ{
+	color: red;
+}
 </style>
 <head>
 	<title>ADMIN</title>
@@ -27,17 +38,17 @@ padding:10px;
 <body>
 	<div id="to">
 	<img id="i1" src="1.jpg"></img>
+	<div id="up">
+		<h1> Upload Document</h1>
+			<label>Upload
+				<input type="file" id="file">
+			</label>
+		<button type="btn btn-primary" id="uploadButton" onclick="uploadFile()">UPLOAD</button>
+		<p id="succ">UPLOAD SUCCESSFUL</p>
 	</div>
-	<div>
-	<h1>Upload Document</h1>
-		<label>Upload File
-			<input type="file" id="file">
-		</label>
-	<button type="btn btn-primary" id="uploadButton" onclick="uploadFile()">UPLOAD</button>
-	<p id="succ">UPLOAD SUCCESSFUL</p>
 	</div>
 	<div id="Files">
-	<span id="Docs"></span>
+	<div id="Docs"></div>
 	<div id="View">
 	<iframe id="iview" src=""></iframe>
 	</div>
@@ -62,6 +73,7 @@ padding:10px;
   	var idnum = 0;
 	var dict1 = {};
   	var delstr = 'deleteclass';
+	var itestr = 'itemclass';
 	var restr = 'renameclass';
 	var vistr = 'viewclass';
 	dbref.on('value', function(snapshot){
@@ -70,7 +82,7 @@ padding:10px;
         		var url = dict['url'];
         		var name = dict['name'];
 			dict1[item.key]=dict;    		
-			datatodisplay += "<li id="+"item"+item.key+"><ul>"
+			datatodisplay += "<li class ="+itestr+" id="+"item"+item.key+"><ul>"
         		datatodisplay += "<li>"+ name +"</li>";
         		datatodisplay += "<li>"+ "<button class="+delstr+" id="+item.key+">DELETE</button>" +"</li>";
 			datatodisplay += "<li>"+ "<button class="+restr+" id="+"re"+item.key+">RENAME</button>" +"</li>";
@@ -81,6 +93,10 @@ padding:10px;
 		console.log(dict1);
     		datatodisplay += "</ol>";
     		document.getElementById("Docs").innerHTML = datatodisplay;
+		var all = document.getElementsByClassName(itestr);
+		all[0].style.backgroundColor = '#93aaff';
+		var link=dict1[all[0].id.substr(4)]['url'];
+		document.getElementById('iview').src=link;
     		$(".deleteclass").click(function(){
       			console.log(this.id+'');
       			datatodisplay = '<ol>';
@@ -100,11 +116,18 @@ padding:10px;
 				return;			
 			}else{
 				datatodisplay = '<ol>';
+				idnum=0;
 				document.getElementById("Docs").innerHTML = datatodisplay;
 				dbref1.update({ name : nn });
 			}
 		});
 		$("."+vistr).click(function() {
+			var itemid= "item" + this.id.substr(2);
+			var all = document.getElementsByClassName(itestr);
+			for (var i = 0; i < all.length; i++) {
+  				all[i].style.backgroundColor = '#fffddb';
+			}
+			document.getElementById(itemid).style.backgroundColor = '#93aaff';
 			var link=dict1[this.id.substr(2)]['url'];
 			document.getElementById('iview').src=link;
 		});
@@ -120,6 +143,7 @@ padding:10px;
 	});
 	function uploadFile(){		
 		datatodisplay = "<ol>";
+		idnum=0;
 		var filename = selectedFile.name;
 		console.log(filename);
 		var storageRef = firebase.storage().ref();
